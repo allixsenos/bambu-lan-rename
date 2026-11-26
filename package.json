@@ -1,0 +1,19 @@
+{
+  "name": "bambu-lan-rename",
+  "version": "0.1.0",
+  "description": "Rename a Bambu Lab printer in LAN-only mode over local MQTT, without the cloud. Unofficial, not endorsed by Bambu Lab.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "bambu-lan-rename": "bambu-lan-rename.js"
+  },
+  "files": [
+    "bambu-lan-rename.js"
+  ],
+  "engines": {
+    "node": ">=18.3"
+  },
+  "dependencies": {
+    "mqtt": "^5.16.1"
+  }
+}
