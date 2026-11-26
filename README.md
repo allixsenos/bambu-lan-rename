@@ -120,13 +120,12 @@ This project adds a small command that runs with `npx`, SSDP discovery to find t
 
 ## Tested hardware
 
-| Printer | Firmware | Result | Source |
-|---|---|---|---|
-| A1 | Not known | ✅ | synman, [OpenBambuAPI #46](https://github.com/Doridian/OpenBambuAPI/issues/46) |
-| P2S | 01.02.00.00 | ✅ | Maintainer test |
-| P2S | 01.03.00.00 | ✅ | Maintainer test |
+| Printer | Latest firmware tested | Result |
+|---|---|---|
+| A1 | Not known | ✅ |
+| P2S | 01.03.00.00 | ✅ |
 
-Names with non-ASCII characters work on the P2S.
+[HARDWARE.md](HARDWARE.md) has each report, with all firmware versions, reporters, dates and notes.
 
 If you try the tool on a printer or a firmware version that is not in the table, please [send a printer report](https://github.com/allixsenos/bambu-lan-rename/issues/new?template=printer-report.yml). A report that the rename fails is also useful.
 

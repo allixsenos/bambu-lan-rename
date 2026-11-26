@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Each report goes into the "Tested hardware" table in the README. A report that the rename fails is as useful as one that it works.
+        Each report goes into [HARDWARE.md](https://github.com/allixsenos/bambu-lan-rename/blob/main/HARDWARE.md). A report that the rename fails is as useful as one that it works.
 
   - type: input
     id: model
