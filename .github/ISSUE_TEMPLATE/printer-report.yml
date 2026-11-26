@@ -1,0 +1,70 @@
+name: Printer report
+description: Tell us if the rename works on your printer and firmware.
+title: "[Printer report]: "
+labels: ["printer-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Each report goes into [HARDWARE.md](https://github.com/allixsenos/bambu-lan-rename/blob/main/HARDWARE.md). A report that the rename fails is as useful as one that it works.
+
+  - type: input
+    id: model
+    attributes:
+      label: Printer model
+      description: For example A1, A1 mini, P1S, P2S, X1C, H2D.
+    validations:
+      required: true
+
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware version
+      description: The printer screen shows it in the settings. The `list` command also prints it.
+      placeholder: 01.03.00.00
+    validations:
+      required: true
+
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - The rename works and Bambu Studio shows the new name
+        - The rename works but Bambu Studio still shows the old name
+        - The printer reports an error
+        - The printer does not answer
+    validations:
+      required: true
+
+  - type: dropdown
+    id: restart
+    attributes:
+      label: Does the name stay after a printer restart?
+      options:
+        - I did not try
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: setup
+    attributes:
+      label: Printer setup
+      options:
+        - label: The printer is in LAN-only mode.
+        - label: Developer Mode is on.
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Tool output
+      description: Paste the output of the `rename` command. Remove the access code if it is in the output.
+      render: text
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Other notes
+      description: For example, the name you used, or characters that did not work.
