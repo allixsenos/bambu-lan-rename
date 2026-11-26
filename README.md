@@ -44,7 +44,7 @@ The tool uses only the local MQTT broker that Developer Mode opens, with the acc
 ### Find the printers
 
 ```sh
-npx github:allixsenos/bambu-lan-rename list
+npx bambu-lan-rename list
 ```
 
 The output has one line for each printer: IP address, serial number, model code, firmware version, and name.
@@ -65,7 +65,7 @@ There are three solutions:
 - Run the command with `--sweep`. The tool then also sends the search request to each address on the local subnets. An answer to one of these requests is a reply, and the firewall lets it in.
 
   ```sh
-  npx github:allixsenos/bambu-lan-rename list --sweep
+  npx bambu-lan-rename list --sweep
   ```
 
 - Let Node.js accept incoming connections. On macOS, go to System Settings > Network > Firewall > Options.
@@ -78,7 +78,7 @@ The sweep is not on by default. It sends some thousand packets to addresses that
 1. Run the `rename` command with the IP address of the printer and the new name.
 
    ```sh
-   npx github:allixsenos/bambu-lan-rename rename --host 192.0.2.10 "Workshop-1"
+   npx bambu-lan-rename rename --host 192.0.2.10 "Workshop-1"
    ```
 
 2. Type the access code at the prompt.
