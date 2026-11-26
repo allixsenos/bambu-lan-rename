@@ -54,7 +54,24 @@ The output has one line for each printer: IP address, serial number, model code,
 192.0.2.11	01P00A000000002	N7	01.02.00.00	3DP-01P-002
 ```
 
-On macOS, the system can ask to let Node.js find devices on the local network. Allow it. If you do not, the `list` command finds no printers. The `rename` command with `--host` works without this permission.
+#### If the list is empty
+
+A firewall on your computer can block the answers from the printers. The macOS firewall does this when it shows "Do you want the application node to accept incoming network connections?" and you select Deny.
+
+Each printer sends its answer from its own address. The tool did not send a packet to that address, so the firewall sees the answer as a new incoming connection.
+
+There are three solutions:
+
+- Run the command with `--sweep`. The tool then also sends the search request to each address on the local subnets. An answer to one of these requests is a reply, and the firewall lets it in.
+
+  ```sh
+  npx github:allixsenos/bambu-lan-rename list --sweep
+  ```
+
+- Let Node.js accept incoming connections. On macOS, go to System Settings > Network > Firewall > Options.
+- Do not use `list`. The `rename` command with `--host` sends its packets directly to the printer, so the firewall does not block it.
+
+The sweep is not on by default. It sends some thousand packets to addresses that are not printers. It ignores a subnet that is larger than a /20 network.
 
 ### Rename a printer
 
@@ -78,6 +95,7 @@ The tool reads the name back from SSDP discovery. This shows that other programs
 | Option | Effect |
 |---|---|
 | `BAMBU_ACCESS_CODE` | Environment variable. If you set it, the tool does not ask for the access code. |
+| `--sweep` | For `list`. Also sends the search request to each address on the local subnets. |
 | `--serial <serial>` | Supplies the serial number. Use it when discovery cannot find the printer. |
 | `--timeout <seconds>` | Sets the time that the tool waits for the printer. The default is 10. |
 

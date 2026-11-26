@@ -24,6 +24,7 @@
  */
 
 import dgram from "node:dgram";
+import os from "node:os";
 import { parseArgs } from "node:util";
 import mqtt from "mqtt";
 
@@ -45,14 +46,21 @@ const SSDP_SEARCH = Buffer.from(
     "\r\n",
 );
 
+// The sweep (the --sweep option) sends the search request to each address on
+// the local subnets. A subnet larger than this prefix length has too many addresses, so the
+// sweep ignores it.
+const SWEEP_MIN_PREFIX = 20;
+const SWEEP_BATCH = 128;
+
 const USAGE = `Rename a Bambu Lab printer in LAN-only mode.
 Unofficial. Not affiliated with, and not endorsed by, Bambu Lab.
 
 Usage:
-  bambu-lan-rename list
+  bambu-lan-rename list [--sweep]
   bambu-lan-rename rename --host <ip> "<new name>"
 
 Options:
+  --sweep              list: also ask each address on the local subnets
   --host <ip>          IP address of the printer
   --serial <serial>    serial number of the printer (default: from discovery)
   --timeout <seconds>  time to wait for the printer (default: 10)
@@ -74,21 +82,58 @@ function parseSsdp(packet) {
 }
 
 /**
+ * Return each host address on the local IPv4 subnets, without our own
+ * addresses. These are the targets of the sweep in `discover`.
+ */
+function localSubnetAddresses() {
+  const toNumber = (address) => address.split(".").reduce((sum, octet) => sum * 256 + Number(octet), 0);
+  const toAddress = (n) => [n >>> 24, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join(".");
+  const own = new Set();
+  const targets = new Set();
+  for (const addresses of Object.values(os.networkInterfaces())) {
+    for (const iface of addresses ?? []) {
+      if (iface.family !== "IPv4" || iface.internal || !iface.cidr) continue;
+      own.add(iface.address);
+      const prefix = Number(iface.cidr.split("/")[1]);
+      if (prefix < SWEEP_MIN_PREFIX || prefix > 30) continue;
+      const size = 2 ** (32 - prefix);
+      const network = Math.floor(toNumber(iface.address) / size) * size;
+      // Skip the first address (the network) and the last one (broadcast).
+      for (let host = 1; host < size - 1; host++) targets.add(toAddress(network + host));
+    }
+  }
+  for (const address of own) targets.delete(address);
+  return [...targets];
+}
+
+/**
  * Find Bambu printers on the local network.
  *
- * Listens for the periodic SSDP broadcasts and also sends a search request,
- * because a printer broadcasts only every few seconds.
+ * Sends an SSDP search request to the multicast group, and also listens for
+ * SSDP broadcasts. Each printer answers the search request, but the answer
+ * comes from an address that we did not send to. A host firewall that blocks
+ * incoming connections (the macOS application firewall, for example) drops it.
+ *
+ * Options:
+ * - `onlyHost`: also send the search request to this address, and stop as
+ *   soon as this printer answers.
+ * - `sweep`: also send the search request to each address on the local
+ *   subnets. An answer to one of these requests is a reply to our own
+ *   packet, so a firewall lets it in. Off by default, because it sends some
+ *   thousand packets to addresses that are not printers.
  *
  * Resolves to a Map from each printer IP address to
- * `{name, serial, model, firmware}`. If `onlyHost` is set, the search stops
- * as soon as that printer answers.
+ * `{name, serial, model, firmware}`.
  */
-function discover(timeoutSeconds, onlyHost) {
+function discover(timeoutSeconds, { onlyHost, sweep = false } = {}) {
   return new Promise((resolve) => {
     const printers = new Map();
     const sockets = [];
+    let finished = false;
 
     const finish = () => {
+      if (finished) return;
+      finished = true;
       clearTimeout(timer);
       for (const socket of sockets) {
         try {
@@ -135,11 +180,21 @@ function discover(timeoutSeconds, onlyHost) {
     search.on("message", onMessage);
     search.on("error", () => {});
     search.bind(() => {
-      for (const port of SSDP_PORTS) {
-        for (const target of [SSDP_GROUP, onlyHost].filter(Boolean)) {
-          search.send(SSDP_SEARCH, port, target, () => {});
+      const targets = [SSDP_GROUP];
+      if (onlyHost) targets.push(onlyHost);
+      if (sweep) targets.push(...localSubnetAddresses());
+      // Send in batches. One burst of some thousand packets can fill the
+      // send buffer, and the system then drops packets without an error.
+      const sendBatch = () => {
+        if (finished) return;
+        for (const target of targets.splice(0, SWEEP_BATCH)) {
+          for (const port of SSDP_PORTS) {
+            search.send(SSDP_SEARCH, port, target, () => {});
+          }
         }
-      }
+        if (targets.length > 0) setTimeout(sendBatch, 20);
+      };
+      sendBatch();
     });
   });
 }
@@ -232,10 +287,11 @@ function askAccessCode() {
   });
 }
 
-async function cmdList(timeout) {
-  const printers = await discover(timeout);
+async function cmdList(timeout, sweep) {
+  const printers = await discover(timeout, { sweep });
   if (printers.size === 0) {
     console.error("No printers found.");
+    if (!sweep) console.error("A firewall on this computer can block the answers. Try again with --sweep.");
     return 1;
   }
   for (const address of [...printers.keys()].sort()) {
@@ -249,7 +305,7 @@ async function cmdRename(host, name, serial, timeout) {
   if (!serial) {
     // The MQTT topic contains the serial number. Get it from discovery so
     // the user only has to supply the IP address.
-    serial = (await discover(timeout, host)).get(host)?.serial;
+    serial = (await discover(timeout, { onlyHost: host })).get(host)?.serial;
     if (!serial) {
       console.error("Could not find the serial number. Supply it with --serial.");
       return 1;
@@ -268,7 +324,7 @@ async function cmdRename(host, name, serial, timeout) {
 
   // The MQTT answer only says that the printer accepted the command. The
   // name in the discovery broadcast is what other programs see.
-  const announced = (await discover(timeout, host)).get(host)?.name;
+  const announced = (await discover(timeout, { onlyHost: host })).get(host)?.name;
   if (announced === name) {
     console.log(`${host} is now ${announced}`);
   } else {
@@ -284,6 +340,7 @@ async function main() {
       host: { type: "string" },
       serial: { type: "string" },
       timeout: { type: "string", default: "10" },
+      sweep: { type: "boolean" },
       help: { type: "boolean", short: "h" },
     },
   });
@@ -299,7 +356,7 @@ async function main() {
     return 1;
   }
   if (command === "list" && positionals.length === 1) {
-    return cmdList(timeout);
+    return cmdList(timeout, values.sweep);
   }
   if (command === "rename" && positionals.length === 2 && values.host) {
     return cmdRename(values.host, name, values.serial, timeout);
