@@ -15,8 +15,11 @@
  * object plus `"result": "success"`, and then announces the new name in its
  * SSDP discovery broadcasts.
  *
- * Bambu Lab does not document this command. It was found by experiment and
- * tested on a P2S with firmware 01.02.00.00 and 01.03.00.00.
+ * Bambu Lab does not document this command. The GitHub user synman found it
+ * and reported it on 2026-03-04 in OpenBambuAPI issue #46:
+ * https://github.com/Doridian/OpenBambuAPI/issues/46
+ *
+ * This tool was tested on a P2S with firmware 01.02.00.00 and 01.03.00.00.
  *
  * Usage:
  *     bambu-lan-rename list

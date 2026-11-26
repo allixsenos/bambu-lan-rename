@@ -26,7 +26,7 @@ The printer answers on the topic `device/<serial>/report`:
 
 The printer then announces the new name in its SSDP discovery answers. Bambu Studio reads the name from SSDP discovery.
 
-Bambu Lab does not document this command. I found it by experiment.
+Bambu Lab does not document this command. This project did not discover it. See [Credit](#credit).
 
 The tool uses only the local MQTT broker that Developer Mode opens, with the access code of your own printer. It does not connect to the Bambu cloud, and it does not contain Bambu Lab code.
 
@@ -110,6 +110,14 @@ npm install
 node bambu-lan-rename.js list
 ```
 
+## Credit
+
+The GitHub user [synman](https://github.com/synman) found the rename command. On 2026-03-04, synman reported it in [OpenBambuAPI issue #46](https://github.com/Doridian/OpenBambuAPI/issues/46). The method was to rename a printer in cloud mode, read the answer on the local MQTT report topic, and send the same `update` message to a printer in LAN-only mode.
+
+synman also maintains [bambu-printer-manager](https://github.com/synman/bambu-printer-manager), a Python library that has the same command and a [reference for the MQTT protocol](https://github.com/synman/bambu-printer-manager/blob/devel/docs/mqtt-protocol-reference.md).
+
+This project adds a small command that runs with `npx`, SSDP discovery to find the serial number and to read the name back, and test results for the P2S.
+
 ## Tested hardware
 
 | Printer | Firmware | Result |
@@ -117,7 +125,7 @@ node bambu-lan-rename.js list
 | P2S | 01.02.00.00 | The rename works. |
 | P2S | 01.03.00.00 | The rename works. |
 
-Names with non-ASCII characters work. I did not test other models.
+Names with non-ASCII characters work. I did not test other models. For reports about other models, see [Credit](#credit).
 
 ## Limits
 
