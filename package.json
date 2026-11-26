@@ -3,6 +3,21 @@
   "version": "0.1.0",
   "description": "Rename a Bambu Lab printer in LAN-only mode over local MQTT, without the cloud. Unofficial, not endorsed by Bambu Lab.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/allixsenos/bambu-lan-rename.git"
+  },
+  "homepage": "https://github.com/allixsenos/bambu-lan-rename#readme",
+  "bugs": "https://github.com/allixsenos/bambu-lan-rename/issues",
+  "keywords": [
+    "bambu",
+    "bambulab",
+    "3d-printer",
+    "lan",
+    "mqtt",
+    "rename",
+    "p2s"
+  ],
   "type": "module",
   "bin": {
     "bambu-lan-rename": "bambu-lan-rename.js"
