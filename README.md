@@ -122,9 +122,9 @@ This project adds a small command that runs with `npx`, SSDP discovery to find t
 
 | Printer | Firmware | Result | Source |
 |---|---|---|---|
-| A1 | Not known | The rename works. | synman, [OpenBambuAPI #46](https://github.com/Doridian/OpenBambuAPI/issues/46) |
-| P2S | 01.02.00.00 | The rename works. | Maintainer test |
-| P2S | 01.03.00.00 | The rename works. | Maintainer test |
+| A1 | Not known | ✅ | synman, [OpenBambuAPI #46](https://github.com/Doridian/OpenBambuAPI/issues/46) |
+| P2S | 01.02.00.00 | ✅ | Maintainer test |
+| P2S | 01.03.00.00 | ✅ | Maintainer test |
 
 Names with non-ASCII characters work on the P2S.
 
