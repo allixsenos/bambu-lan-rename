@@ -120,12 +120,15 @@ This project adds a small command that runs with `npx`, SSDP discovery to find t
 
 ## Tested hardware
 
-| Printer | Firmware | Result |
-|---|---|---|
-| P2S | 01.02.00.00 | The rename works. |
-| P2S | 01.03.00.00 | The rename works. |
+| Printer | Firmware | Result | Source |
+|---|---|---|---|
+| A1 | Not known | The rename works. | synman, [OpenBambuAPI #46](https://github.com/Doridian/OpenBambuAPI/issues/46) |
+| P2S | 01.02.00.00 | The rename works. | Maintainer test |
+| P2S | 01.03.00.00 | The rename works. | Maintainer test |
 
-Names with non-ASCII characters work. I did not test other models. For reports about other models, see [Credit](#credit).
+Names with non-ASCII characters work on the P2S.
+
+If you try the tool on a printer or a firmware version that is not in the table, please [send a printer report](https://github.com/allixsenos/bambu-lan-rename/issues/new?template=printer-report.yml). A report that the rename fails is also useful.
 
 ## Limits
 
