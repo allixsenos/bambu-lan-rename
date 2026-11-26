@@ -135,3 +135,7 @@ Names with non-ASCII characters work. I did not test other models. For reports a
 - The tool does not make sure that the TLS certificate of the printer is correct. A private Bambu Lab certificate authority signs the certificate for the serial number, not for the IP address. Use the tool only on a network that you trust.
 - Programs that keep their own copy of the name do not see the change. The Home Assistant integration is an example.
 - Use the tool at your own risk. It comes with no warranty.
+
+## License
+
+[MIT](LICENSE).
